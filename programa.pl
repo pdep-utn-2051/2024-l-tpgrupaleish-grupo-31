@@ -28,11 +28,14 @@ jugador(dimitri, romanos, [herreria, fundicion]).
 
 
 esExpertoMetales(Jugador):- 
-    jugador(Jugador, _, [herreria, forja, fundicion]).
+    jugador(Jugador, _, Tecnologias),
+    member(herreria, Tecnologias),
+    member(forja, Tecnologias),
+    member(fundicion, Tecnologias).
 esExpertoMetales(Jugador):-
-    jugador(Jugador, _, [fundicion]).
-esExpertoMetales(Jugador):-
-    jugador(Jugador, romanos, _).
+    jugador(Jugador, romanos, Tecnologias),
+    member(herreria, Tecnologias),
+    member(forja, Tecnologias).
 
 
 esCivilizacionPopular(Civilizacion):-
@@ -48,12 +51,20 @@ tieneAlcanceGlobal(Tecnologia):-
 
 esCivilizacionLider(Civilizacion):-
     civilizacion(Civilizacion),
-    forall((jugador(_, _, Tecnologias), member(Tecnologia, Tecnologias)),
-           civilizacionAlcanzoTecnologia(Civilizacion, Tecnologia)).
+    forall((civilizacion(OtraCivilizacion), Civilizacion \= OtraCivilizacion), civilizacionLidera(Civilizacion, OtraCivilizacion)).
 
+civilizacionLidera(Civilizacion1, Civilizacion2):-
+    civilizacion(Civilizacion1),
+    civilizacion(Civilizacion2),
+    civilizacionAlcanzoTecnologias(Civilizacion1, TecnologiasAlcanzadas1),
+    civilizacionAlcanzoTecnologias(Civilizacion2, TecnologiasAlcanzadas2),
+    Civilizacion1 \= Civilizacion2,
+    elementoDeUnaListaPerteneceAOtra(TecnologiasAlcanzadas2, TecnologiasAlcanzadas1).
 
-civilizacionAlcanzoTecnologia(Civilizacion, Tecnologia):-
-    jugador(_, Civilizacion, Tecnologias), member(Tecnologia, Tecnologias).
+civilizacionAlcanzoTecnologias(Civilizacion, TecnologiasCivilizacion):-
+    civilizacion(Civilizacion),
+    findall(Tecnologia, (jugador(_, Civilizacion, Tecnologias), member(Tecnologia, Tecnologias)), TodasTecnologias),
+    list_to_set(TodasTecnologias, TecnologiasCivilizacion).
 
 
 campeon(Vida):-
@@ -114,27 +125,13 @@ unidadGana(Unidad1, Unidad2):-
     Vida1 > Vida2.
 
 
-esPiqueroConEscudo(piquero(_, escudo)).
-
-esPiqueroSinEscudo(piquero(_)).
-
-
-contarPiqueroConEscudo(Jugador, Cantidad):-
-    unidadJugador(Jugador, Unidades),
-    findall(1, (member(Unidad, Unidades), esPiqueroConEscudo(Unidad)), ListaConEscudo),
-    length(ListaConEscudo, Cantidad).
-
-
-contarPiqueroSinEscudo(Jugador, Cantidad):-
-    unidadJugador(Jugador, Unidades),
-    findall(1, (member(Unidad, Unidades), esPiqueroSinEscudo(Unidad), \+ esPiqueroConEscudo(Unidad)), ListaSinEscudo), %con \+ nosa asegfuramos que solo tome a los que no tienen escudo
-    length(ListaSinEscudo, Cantidad).
-
-
 puedeSobrevivirAsedio(Jugador):-
-    contarPiqueroConEscudo(Jugador, CantidadConEscudo),
-    contarPiqueroSinEscudo(Jugador, CantidadSinEscudo),
-    CantidadConEscudo > CantidadSinEscudo.
+    unidadJugador(Jugador, Unidades),
+    findall(piquero(Nivel, escudo), member(piquero(Nivel, escudo), Unidades), PiquerosConEscudo),
+    findall(piquero(Nivel), member(piquero(Nivel), Unidades), PiquerosSinEscudo),
+    length(PiquerosConEscudo, CantConEscudo),
+    length(PiquerosSinEscudo, CantSinEscudo),
+    CantConEscudo > CantSinEscudo.
 
 
 depende(emplumado, herreria).

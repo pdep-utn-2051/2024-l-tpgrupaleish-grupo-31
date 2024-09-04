@@ -1,5 +1,4 @@
 % Aquí va el código.
-
 nombre(ana).
 nombre(beto).
 nombre(carola).
@@ -115,13 +114,15 @@ tieneVentaja(jinete(camello), jinete(caballo)).
 
 
 unidadGana(Unidad1, Unidad2):-
+    vida(Unidad1, Vida1),
+    vida(Unidad2, Vida2),
     tieneVentaja(Unidad1, Unidad2), !.
 
 unidadGana(Unidad1, Unidad2):-
-    not(tieneVentaja(Unidad1, Unidad2)),
-    not(tieneVentaja(Unidad2, Unidad1)),
     vida(Unidad1, Vida1),
     vida(Unidad2, Vida2),
+    not(tieneVentaja(Unidad1, Unidad2)),
+    not(tieneVentaja(Unidad2, Unidad1)),
     Vida1 > Vida2.
 
 
@@ -147,6 +148,7 @@ depende(arado, collegamento).
 
 
 sinDependencias(Tecnologia) :-
+    tecnologia(Tecnologia),
     not(depende(Tecnologia, _)).
 
 
